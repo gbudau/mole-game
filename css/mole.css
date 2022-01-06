@@ -1,0 +1,104 @@
+html {
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+body {
+  background-color: #c0c86d;
+}
+
+.play {
+  background-image: url("../images/background.png");
+  background-repeat: no-repeat;
+  cursor: url("../images/cursor.png"), auto;
+}
+
+.win {
+  background-image: none;
+  cursor: default;
+}
+
+.score-container {
+  margin:0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.score {
+  flex: 1 1 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.worm {
+  width: 100%;
+  height: 100%;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.5s ease-in-out;
+}
+
+.board-container {
+  margin:0;
+  padding: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.mole-container {
+  flex-basis: 20%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hole {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: black;
+  border-radius: 50%;
+  width: 267px;
+  height: 267px;
+  border: 2px solid white;
+}
+
+.mole {
+  display: none;
+}
+
+.mole:active {
+  cursor: url("../images/cursor-worm.png"), auto;
+}
+
+.show {
+  display: block;
+}
+
+.hide {
+  display: none;
+}
+
+.winning-container {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.winning-img {
+  display: none;
+}
