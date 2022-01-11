@@ -2,27 +2,25 @@ html {
   box-sizing: border-box;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: inherit;
 }
 
 body {
+  margin: 0;
   background-color: #c0c86d;
-}
-
-.play {
   background-image: url("../images/background.png");
   background-repeat: no-repeat;
+}
+
+.game-board {
   cursor: url("../images/cursor.png"), auto;
 }
 
-.win {
-  background-image: none;
-  cursor: default;
-}
-
 .score-container {
-  margin:0;
+  margin: 0;
   padding: 0;
   display: flex;
   justify-content: center;
@@ -46,7 +44,7 @@ body {
 }
 
 .board-container {
-  margin:0;
+  margin: 0;
   padding: 0;
   display: flex;
   justify-content: space-around;
@@ -75,12 +73,12 @@ body {
   border: 2px solid white;
 }
 
-.mole {
-  display: none;
+.hungry {
+  cursor: url("../images/cursor-worm.png"), auto;
 }
 
-.mole:active {
-  cursor: url("../images/cursor-worm.png"), auto;
+.gone {
+  display: none;
 }
 
 .show {
@@ -100,5 +98,5 @@ body {
 }
 
 .winning-img {
-  display: none;
+  max-height: 100vh;
 }

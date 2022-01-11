@@ -1,108 +1,146 @@
-const moles = document.querySelectorAll(".mole")
 const worm = document.querySelector(".worm");
-const MOLE_SHOW_MIN = 1000;
-const MOLE_SHOW_MAX = 2000;
-const WAIT_BETWEEN_SHOW_MIN = 1000;
-const WAIT_BETWEEN_SHOW_MAX = 2000;
-const TIME_BEFORE_LEAVING = 500;
+const TIME_SAD = 500;
 const TIME_LEAVING = 500;
+const TIME_GONE_MIN = 2000;
+const TIME_GONE_MAX = 20000;
+const TIME_HUNGRY = 1000;
+const TIME_FED = 500;
 const WIN_SCORE = 10;
+const moles = [];
 let score = 0;
+
+function getNextTime(ms) {
+  return Date.now() + ms;
+}
 
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function updateScore(mole) {
-
-  if (mole.classList.contains("mole-clicked")) {
-    const isKing = mole.getAttribute("src") === "./images/king-mole-fed.png";
-    mole.classList.remove("mole-clicked");
-    if (isKing) {
-      mole.setAttribute("src", "./images/king-mole-fed.png");
-    } else {
-      mole.setAttribute("src", "./images/mole-fed.png");
-    }
-  } else {
-    const isKing = mole.getAttribute("src") === "./images/king-mole-hungry.png";
-    if (isKing) {
-      mole.setAttribute("src", "./images/king-mole-sad.png");
-    } else {
-      mole.setAttribute("src", "./images/mole-sad.png");
-    }
-  }
+function getKingStatus() {
+  return Math.random() > 0.9;
 }
 
 function showWinningScreen() {
-  const scoreSection = document.querySelector(".score-container");
-  const boardSection = document.querySelector(".board-container");
-  const winningImg = document.querySelector(".winning-img");
-  scoreSection.classList.add("hide");
-  boardSection.classList.add("hide");
-  document.body.classList.remove("play");
-  document.body.classList.add("win");
-  winningImg.style.display = "block";
+  const gameBoard = document.querySelector(".game-board");
+  gameBoard.classList.add("hide");
+  const win = document.querySelector(".win");
+  document.body.style.backgroundImage = "none";
+  win.classList.remove("hide");
 }
 
-async function showMole(timestamp) {
-  const index = Math.floor(getRandomArbitrary(0, moles.length));
-  const mole = moles[index];
-  const isKing = Math.random() >= 0.5;
-  if (isKing) {
-    mole.setAttribute("src", "./images/king-mole-hungry.png");
-  }
-  mole.classList.add("show");
-  await sleep(getRandomArbitrary(MOLE_SHOW_MIN, MOLE_SHOW_MAX));
-  updateScore(mole);
-  await sleep(TIME_BEFORE_LEAVING);
-  if (isKing) {
-    mole.setAttribute("src", "./images/king-mole-leaving.png");
-  } else {
-    mole.setAttribute("src", "./images/mole-leaving.png");
-  }
-  await sleep(TIME_LEAVING);
-  mole.classList.remove("show");
-  mole.setAttribute("src", "./images/mole-hungry.png");
-  if (score < WIN_SCORE) {
-    await sleep(getRandomArbitrary(WAIT_BETWEEN_SHOW_MIN, WAIT_BETWEEN_SHOW_MAX));
-    window.requestAnimationFrame(showMole);
-  } else {
-    await sleep(500);
+function updateScorebar(mole) {
+  const hiddenPercent = Math.max(0, 100 - score * (100 / WIN_SCORE));
+  worm.style.clipPath = `inset(0 ${hiddenPercent}% 0 0)`;
+  if (score >= WIN_SCORE) {
     showWinningScreen();
   }
 }
 
-function updateWormScore(mole, isKing) {
-  score = isKing ? score + 2 : score + 1;
-  const hiddenPercent = Math.max(0, 100 - score * (100 / WIN_SCORE));
-  worm.style.clipPath = `inset(0 ${hiddenPercent}% 0 0)`;
+function getNextStatus(mole) {
+  switch (mole.state) {
+    case "hungry":
+      if (mole.isKing) {
+        mole.node.setAttribute("src", "./images/king-mole-sad.png");
+      } else {
+        mole.node.setAttribute("src", "./images/mole-sad.png");
+      }
+      mole.node.classList.remove("hungry");
+      mole.state = "sad";
+      mole.nextStateTime = getNextTime(TIME_SAD);
+      break;
+    case "sad":
+      if (mole.isKing) {
+        score = Math.max(0, score - 2);
+      } else {
+        score = Math.max(0, score - 1);
+      }
+      updateScorebar();
+    case "fed":
+      if (mole.isKing) {
+        mole.node.setAttribute("src", "./images/king-mole-leaving.png");
+      } else {
+        mole.node.setAttribute("src", "./images/mole-leaving.png");
+      }
+      mole.state = "leaving";
+      mole.nextStateTime = getNextTime(TIME_LEAVING);
+      break;
+    case "leaving":
+      mole.isKing = false;
+      mole.state = "gone";
+      mole.node.classList.add("gone");
+      mole.nextStateTime = getNextTime(
+        getRandomArbitrary(TIME_GONE_MIN, TIME_GONE_MAX)
+      );
+      break;
+    case "gone":
+      mole.isKing = getKingStatus();
+      if (mole.isKing) {
+        mole.node.setAttribute("src", "./images/king-mole-hungry.png");
+      } else {
+        mole.node.setAttribute("src", "./images/mole-hungry.png");
+      }
+      mole.state = "hungry";
+      mole.node.classList.add("hungry");
+      mole.node.classList.remove("gone");
+      mole.nextStateTime = getNextTime(TIME_HUNGRY);
+      break;
+  }
 }
 
-function prepareEventListeners() {
-  moles.forEach(mole => {
-    mole.addEventListener("mousedown", event => {
-      const isKing = event.target.getAttribute("src") === "./images/king-mole-hungry.png";
-      if (isKing) {
-        event.target.setAttribute("src", "./images/king-mole-fed.png");
-      } else {
-        event.target.setAttribute("src", "./images/mole-fed.png");
-      }
-      if (!event.target.classList.contains("mole-clicked")) {
-        updateWormScore(event.target, isKing);
-      }
-      event.target.classList.add("mole-clicked");
+function feed(event) {
+  if (
+    event.target.tagName !== "IMG" ||
+    !event.target.classList.contains("hungry")
+  ) {
+    return;
+  }
+  const mole = moles[parseInt(event.target.dataset.index)];
+  mole.state = "fed";
+  mole.nextStateTime = getNextTime(TIME_FED);
+  mole.node.classList.remove("hungry");
+  if (mole.isKing) {
+    score += 2;
+    mole.node.setAttribute("src", "./images/king-mole-fed.png");
+  } else {
+    score += 1;
+    mole.node.setAttribute("src", "./images/mole-fed.png");
+  }
+  updateScorebar(mole);
+}
+
+function addMouseEventListener() {
+  const board = document.querySelector(".board-container");
+
+  board.addEventListener("click", feed);
+}
+
+function createMoles() {
+  document.querySelectorAll(".mole").forEach((mole) => {
+    mole.setAttribute("src", "./images/king-mole-hungry.png");
+    moles.push({
+      state: "sad",
+      isKing: true,
+      nextStateTime: getNextTime(TIME_SAD),
+      node: mole,
     });
   });
 }
 
-async function init() {
-  prepareEventListeners();
-  await sleep(1000);
-  window.requestAnimationFrame(showMole);
+function nextFrame() {
+  const now = Date.now();
+  moles.forEach((mole) => {
+    if (mole.nextStateTime < now) {
+      getNextStatus(mole);
+    }
+  });
+  requestAnimationFrame(nextFrame);
+}
+
+function init() {
+  createMoles();
+  addMouseEventListener();
+  window.requestAnimationFrame(nextFrame);
 }
 
 init();
