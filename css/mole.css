@@ -10,16 +10,30 @@ html {
 
 body {
   margin: 0;
+  padding: 0;
   background-color: #c0c86d;
-  background-image: url("../images/background.png");
-  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
 }
 
 .game-board {
+  background-image: url("../images/background.png");
+  background-repeat: no-repeat;
   cursor: url("../images/cursor.png"), auto;
+  width: 1920px;
+  height: 1080px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: column;
 }
 
 .score-container {
+  flex-basis: 15%;
   margin: 0;
   padding: 0;
   display: flex;
